@@ -676,54 +676,58 @@ class AkeylessMcpToolWindowPanel(private val project: Project) {
                 statusLabel.text = "Loading items..."
                 statusLabel.icon = AllIcons.Actions.Refresh
             }
+            
             val client = clientService.getClient()
-            val response = withTimeoutOrNull(30_000) {
+            
+            // Call list_items WITHOUT path to get ALL items recursively
+            // (omitting path returns all items across all folders, like CLI "akeyless list-items --json")
+            val response = withTimeoutOrNull(60_000) {
                 client.callTool("list_items", mapOf(
-                    "path" to "/",
-                    "output_fields" to listOf("ItemName", "ItemType", "ItemMetadata", "ItemTags")
+                    "output_fields" to listOf("ItemName", "ItemType", "ItemSubType", "ItemMetadata", "ItemTags")
                 ))
             }
+            
             ApplicationManager.getApplication().invokeLater {
                 try {
                     if (response != null && response.has("result")) {
                         val result = response.getAsJsonObject("result")
-                        logger.info("list_items raw result keys: ${result.keySet()}")
                         val content = extractContentArray(result)
-                        logger.info("list_items parsed content: ${content?.size() ?: "null"} items")
-                        if (content != null && content.size() > 0) {
-                            // Log first few item names to understand structure
-                            for (i in 0 until minOf(5, content.size())) {
-                                val it = content[i]
-                                if (it.isJsonObject) {
-                                    val obj = it.asJsonObject
-                                    val name = obj.get("ItemName")?.asString
-                                        ?: obj.get("item_name")?.asString
-                                        ?: obj.get("name")?.asString ?: "?"
-                                    logger.info("  Item[$i] name='$name' keys=${obj.keySet().take(8)}")
-                                }
-                            }
-                        }
+                        
                         val root = DefaultMutableTreeNode("Akeyless Items")
                         treeModel.setRoot(root)
+                        
                         if (content != null && content.size() > 0) {
+                            logger.info("list_items returned ${content.size()} items total")
+                            // Log a few samples
+                            for (i in 0 until minOf(3, content.size())) {
+                                if (content[i].isJsonObject) {
+                                    val name = content[i].asJsonObject.get("ItemName")?.asString ?: "?"
+                                    logger.info("  Sample: $name")
+                                }
+                            }
                             parseItems(content, root)
                         }
+                        
                         if (root.childCount == 0) {
-                            val placeholder = DefaultMutableTreeNode("(No items found — check path / or your Akeyless account)")
-                            root.add(placeholder)
+                            root.add(DefaultMutableTreeNode("(No items found)"))
                         }
+                        
                         treeModel.reload()
-                        statusLabel.text = "Connected"
+                        statusLabel.text = "Connected (${content?.size() ?: 0} items)"
                         statusLabel.icon = AllIcons.General.InspectionsOK
                     } else {
-                        updateItemsLoadStatus(response == null)
-                        setItemsTreePlaceholder(if (response == null) "Load failed or timed out — click Refresh (toolbar above) to try again" else "No items — click Refresh to load")
+                        setItemsTreePlaceholder(
+                            if (response == null) "Load timed out — click Refresh"
+                            else "No items — click Refresh"
+                        )
+                        statusLabel.text = if (response == null) "Timed out" else "No items"
+                        statusLabel.icon = AllIcons.General.Warning
                     }
                 } catch (e: Exception) {
-                    logger.error("Error parsing list_items response", e)
-                    statusLabel.text = "Failed to load items: ${e.message?.take(60) ?: "parse error"}"
+                    logger.error("Error building items tree", e)
+                    statusLabel.text = "Failed: ${e.message?.take(60) ?: "error"}"
                     statusLabel.icon = AllIcons.General.Error
-                    setItemsTreePlaceholder("Parse error — click Refresh to try again")
+                    setItemsTreePlaceholder("Error — click Refresh to try again")
                 }
             }
         }
@@ -734,19 +738,6 @@ class AkeylessMcpToolWindowPanel(private val project: Project) {
         root.add(DefaultMutableTreeNode(message))
         treeModel.setRoot(root)
         treeModel.reload()
-    }
-
-    private fun updateItemsLoadStatus(timedOut: Boolean) {
-        if (timedOut) {
-            statusLabel.text = "Load timed out - try again"
-            statusLabel.icon = AllIcons.General.Error
-        } else if (clientService.isConnected()) {
-            statusLabel.text = "Connected (items load failed)"
-            statusLabel.icon = AllIcons.General.InspectionsOK
-        } else {
-            statusLabel.text = "Failed to load items"
-            statusLabel.icon = AllIcons.General.Error
-        }
     }
 
     /** Extract content as JsonArray; MCP may return content as array or as [{type, text}] with JSON in text. */
