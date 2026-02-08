@@ -1,6 +1,7 @@
 package com.akeyless.mcp.actions
 
 import com.akeyless.mcp.McpClientService
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
@@ -17,7 +18,7 @@ import javax.swing.JPanel
 /**
  * Action to create a new secret in Akeyless
  */
-class CreateSecretAction : AnAction("Create Secret", "Create a new secret in Akeyless", null), DumbAware {
+class CreateSecretAction : AnAction("Create Secret", "Create a new secret in Akeyless", AllIcons.General.Add), DumbAware {
     override fun actionPerformed(e: AnActionEvent) {
         val dialog = CreateSecretDialog(e.project)
         if (dialog.showAndGet()) {
