@@ -1,0 +1,66 @@
+<idea-plugin>
+    <id>com.akeyless.mcp</id>
+    <name>Akeyless MCP</name>
+    <version>1.0.0</version>
+    <vendor email="support@akeyless.io" url="https://www.akeyless.io">Akeyless</vendor>
+
+    <description><![CDATA[
+    Akeyless MCP Plugin for JetBrains IDEs
+    
+    This plugin connects to Akeyless through the Model Context Protocol (MCP) server,
+    allowing you to manage secrets, keys, certificates, and other Akeyless resources
+    directly from your IDE.
+    
+    Features:
+    - Browse and search Akeyless items
+    - Create, update, and delete secrets
+    - View item details and metadata
+    - Manage authentication methods and roles
+    - Filter items by type and path
+    ]]></description>
+
+    <change-notes><![CDATA[
+    Initial release:
+    - Connect to Akeyless MCP server
+    - List and browse Akeyless items
+    - View item details
+    - Create and manage secrets
+    ]]></change-notes>
+
+    <!-- Product and plugin compatibility requirements -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Application-level components -->
+        <applicationService serviceImplementation="com.akeyless.mcp.McpClientService"/>
+        <applicationService serviceImplementation="com.akeyless.mcp.settings.AkeylessMcpSettings"/>
+        
+        <!-- Settings -->
+        <applicationConfigurable parentId="tools" instance="com.akeyless.mcp.settings.AkeylessMcpConfigurable"
+                                 id="com.akeyless.mcp.settings"
+                                 displayName="Akeyless MCP"/>
+        
+        <!-- Tool Window -->
+        <toolWindow id="Akeyless MCP" secondary="true" anchor="right" icon="/icons/akeyless-logo.svg"
+                    factoryClass="com.akeyless.mcp.ui.AkeylessMcpToolWindowFactory"/>
+    </extensions>
+
+    <actions>
+        <!-- Actions for Akeyless MCP tool window -->
+        <action id="com.akeyless.mcp.actions.RefreshItemsAction"
+                class="com.akeyless.mcp.actions.RefreshItemsAction"
+                text="Refresh"
+                description="Refresh Akeyless items list"/>
+        
+        <action id="com.akeyless.mcp.actions.CreateSecretAction"
+                class="com.akeyless.mcp.actions.CreateSecretAction"
+                text="Create Secret"
+                description="Create a new secret in Akeyless"/>
+        
+        <action id="com.akeyless.mcp.actions.ConfigureAction"
+                class="com.akeyless.mcp.actions.ConfigureAction"
+                text="Configure"
+                description="Configure Akeyless MCP connection"/>
+    </actions>
+</idea-plugin>
