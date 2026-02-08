@@ -33,6 +33,7 @@ import javax.swing.tree.TreeCellRenderer
 class AkeylessMcpToolWindowPanel(private val project: Project) {
     private val logger = thisLogger()
     private val gson = Gson()
+    private val prettyGson = com.google.gson.GsonBuilder().setPrettyPrinting().create()
     private val settings = AkeylessMcpSettings.getInstance()
     private val clientService = com.intellij.openapi.application.ApplicationManager.getApplication().getService(McpClientService::class.java)
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -284,20 +285,10 @@ class AkeylessMcpToolWindowPanel(private val project: Project) {
                             val result = response.getAsJsonObject("result")
                             val content = result.get("content")
                             if (content != null) {
-                                val formattedJson = try {
-                                    val jsonElement = gson.toJsonTree(content)
-                                    com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonElement)
-                                } catch (e: Exception) {
-                                    gson.toJson(content)
-                                }
+                                val formattedJson = formatMcpContent(content)
                                 detailsArea.append("\n✓ Success\nResult:\n$formattedJson\n")
                             } else {
-                                val formattedJson = try {
-                                    val jsonElement = gson.toJsonTree(result)
-                                    com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonElement)
-                                } catch (e: Exception) {
-                                    gson.toJson(result)
-                                }
+                                val formattedJson = prettyGson.toJson(gson.toJsonTree(result))
                                 detailsArea.append("\n✓ Success\nResult:\n$formattedJson\n")
                             }
                         } else if (response.has("error")) {
@@ -310,15 +301,10 @@ class AkeylessMcpToolWindowPanel(private val project: Project) {
                             }
                             detailsArea.append("\n$errorMessage\n")
                             if (error.has("data")) {
-                                detailsArea.append("Details: ${gson.toJson(error.get("data"))}\n")
+                                detailsArea.append("Details: ${prettyGson.toJson(error.get("data"))}\n")
                             }
                         } else {
-                            val formattedJson = try {
-                                val jsonElement = gson.toJsonTree(response)
-                                com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonElement)
-                            } catch (e: Exception) {
-                                gson.toJson(response)
-                            }
+                            val formattedJson = prettyGson.toJson(gson.toJsonTree(response))
                             detailsArea.append("\nResponse:\n$formattedJson\n")
                         }
                     } else {
@@ -466,21 +452,10 @@ class AkeylessMcpToolWindowPanel(private val project: Project) {
                             val result = response.getAsJsonObject("result")
                             val content = result.get("content")
                             if (content != null) {
-                                // Format JSON nicely
-                                val formattedJson = try {
-                                    val jsonElement = gson.toJsonTree(content)
-                                    com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonElement)
-                                } catch (e: Exception) {
-                                    gson.toJson(content)
-                                }
+                                val formattedJson = formatMcpContent(content)
                                 outputArea.append("\n✓ Success\nResponse:\n$formattedJson\n")
                             } else {
-                                val formattedJson = try {
-                                    val jsonElement = gson.toJsonTree(result)
-                                    com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonElement)
-                                } catch (e: Exception) {
-                                    gson.toJson(result)
-                                }
+                                val formattedJson = prettyGson.toJson(gson.toJsonTree(result))
                                 outputArea.append("\n✓ Success\nResponse:\n$formattedJson\n")
                             }
                         } else if (response.has("error")) {
@@ -493,15 +468,10 @@ class AkeylessMcpToolWindowPanel(private val project: Project) {
                             }
                             outputArea.append("\n$errorMessage\n")
                             if (error.has("data")) {
-                                outputArea.append("Details: ${gson.toJson(error.get("data"))}\n")
+                                outputArea.append("Details: ${prettyGson.toJson(error.get("data"))}\n")
                             }
                         } else {
-                            val formattedJson = try {
-                                val jsonElement = gson.toJsonTree(response)
-                                com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(jsonElement)
-                            } catch (e: Exception) {
-                                gson.toJson(response)
-                            }
+                            val formattedJson = prettyGson.toJson(gson.toJsonTree(response))
                             outputArea.append("\nResponse:\n$formattedJson\n")
                         }
                     } else {
@@ -935,6 +905,56 @@ class AkeylessMcpToolWindowPanel(private val project: Project) {
         }
     }
     
+    /**
+     * Format MCP response content for display. MCP responses come as:
+     * [{"type":"text","text":"[{...json data...}]"}]
+     * This extracts the inner text, parses it as JSON, and pretty-prints it.
+     * Falls back to pretty-printing the raw content if extraction fails.
+     */
+    private fun formatMcpContent(content: com.google.gson.JsonElement): String {
+        try {
+            // If content is a JsonArray of MCP content blocks
+            if (content.isJsonArray) {
+                val arr = content.asJsonArray
+                val parts = mutableListOf<String>()
+                for (element in arr) {
+                    if (element.isJsonObject) {
+                        val obj = element.asJsonObject
+                        val type = obj.get("type")?.asString
+                        if (type == "text") {
+                            val textValue = obj.get("text")?.asString ?: continue
+                            // Try to parse the text as JSON and pretty-print it
+                            parts.add(tryPrettyPrintJson(textValue))
+                        } else {
+                            // Non-text content block, just pretty-print the object
+                            parts.add(prettyGson.toJson(obj))
+                        }
+                    } else {
+                        parts.add(prettyGson.toJson(element))
+                    }
+                }
+                return parts.joinToString("\n\n")
+            }
+        } catch (e: Exception) {
+            // Fall through to default formatting
+        }
+        // Default: pretty-print whatever we have
+        return prettyGson.toJson(content)
+    }
+
+    /**
+     * Try to parse a string as JSON and pretty-print it.
+     * If the string is not valid JSON, return it as-is.
+     */
+    private fun tryPrettyPrintJson(text: String): String {
+        return try {
+            val parsed = com.google.gson.JsonParser.parseString(text)
+            prettyGson.toJson(parsed)
+        } catch (e: Exception) {
+            text
+        }
+    }
+
     private fun formatItemType(type: String): String {
         return type.replace("_", " ").split(" ").joinToString(" ") { 
             it.lowercase().replaceFirstChar { c -> c.uppercase() }
