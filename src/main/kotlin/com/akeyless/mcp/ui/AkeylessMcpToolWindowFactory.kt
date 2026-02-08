@@ -26,7 +26,7 @@ class AkeylessMcpToolWindowFactory : ToolWindowFactory {
         actionGroup.add(actionManager.getAction("com.akeyless.mcp.actions.CreateSecretAction"))
         actionGroup.add(actionManager.getAction("com.akeyless.mcp.actions.ConfigureAction"))
         
-        val toolbar = actionManager.createActionToolbar("AkeylessMcpToolbar", actionGroup, false)
+        val toolbar = actionManager.createActionToolbar("AkeylessMcpToolbar", actionGroup, true)
         toolbar.targetComponent = panel!!.getComponent()
         
         val contentPanel = panel!!.getComponent()
