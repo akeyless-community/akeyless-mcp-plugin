@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.akeyless.mcp</id>
     <name>Akeyless MCP</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <vendor email="support@akeyless.io" url="https://www.akeyless.io">Akeyless</vendor>
 
     <description><![CDATA[

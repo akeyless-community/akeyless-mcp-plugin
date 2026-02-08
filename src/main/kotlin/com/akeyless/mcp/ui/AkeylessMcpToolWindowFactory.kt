@@ -34,7 +34,7 @@ class AkeylessMcpToolWindowFactory : ToolWindowFactory {
         mainPanel.add(toolbar.component, java.awt.BorderLayout.NORTH)
         mainPanel.add(contentPanel, java.awt.BorderLayout.CENTER)
         
-        val contentFactory = ContentFactory.SERVICE.getInstance()
+        val contentFactory = ContentFactory.getInstance()
         val toolWindowContent = contentFactory.createContent(mainPanel, "", false)
         // Store panel reference in content for actions to access
         val panelKey = com.intellij.openapi.util.Key.create<AkeylessMcpToolWindowPanel>("AkeylessMcpPanel")
