@@ -5,26 +5,89 @@
     <vendor email="support@akeyless.io" url="https://www.akeyless.io">Akeyless</vendor>
 
     <description><![CDATA[
-    Akeyless MCP Plugin for JetBrains IDEs
-    
-    This plugin connects to Akeyless through the Model Context Protocol (MCP) server,
-    allowing you to manage secrets, keys, certificates, and other Akeyless resources
-    directly from your IDE.
-    
-    Features:
-    - Browse and search Akeyless items
-    - Create, update, and delete secrets
-    - View item details and metadata
-    - Manage authentication methods and roles
-    - Filter items by type and path
+<h2>Akeyless MCP Plugin for JetBrains IDEs</h2>
+
+<p>Integrate <b>Akeyless secrets management</b> directly into your JetBrains IDE through the
+<b>Model Context Protocol (MCP)</b>. Browse, create, and manage secrets, keys, certificates,
+and other Akeyless resources — all without leaving your IDE.</p>
+
+<h3>Features</h3>
+<ul>
+    <li><b>Hierarchical Tree View</b> — Browse all your Akeyless items organized in a folder tree structure</li>
+    <li><b>Item Details</b> — Click on any item to view its full details and metadata</li>
+    <li><b>Create Secrets</b> — Create new secrets directly from the IDE</li>
+    <li><b>Query Interface</b> — Natural language queries to interact with Akeyless (e.g. "List all secrets")</li>
+    <li><b>MCP Tools</b> — Access all 17+ Akeyless MCP tools directly from the IDE</li>
+    <li><b>Real-time Refresh</b> — Refresh your secrets list anytime with one click</li>
+    <li><b>Secure Authentication</b> — Supports Akeyless CLI profiles including SAML and other auth methods</li>
+</ul>
+
+<h3>Getting Started</h3>
+<ol>
+    <li>Install the <b>Akeyless CLI</b>: <code>brew install akeyless/tap/akeyless</code> (macOS) or download from <a href="https://www.akeyless.io">akeyless.io</a></li>
+    <li>Configure your Akeyless profile: <code>akeyless configure --profile saml</code></li>
+    <li>Open <b>Settings → Tools → Akeyless MCP</b> and configure:
+        <ul>
+            <li><b>Server Command</b>: e.g. <code>npx -y @akeyless/cli-mcp</code></li>
+            <li><b>Working Directory</b>: optional working directory for the MCP server</li>
+            <li><b>Akeyless Profile</b>: optional CLI profile name (uses default if empty)</li>
+        </ul>
+    </li>
+    <li>Open <b>View → Tool Windows → Akeyless MCP</b> to start managing your secrets</li>
+</ol>
+
+<h3>MCP Server</h3>
+<p>The plugin connects to an Akeyless MCP server using stdio transport. The server communicates
+via JSON-RPC over stdio. Authentication is handled by the Akeyless CLI using profiles or
+environment variables.</p>
+
+<h3>Requirements</h3>
+<ul>
+    <li>JetBrains IDE (IntelliJ IDEA, PyCharm, WebStorm, etc.) <b>2023.2</b> or higher</li>
+    <li>Akeyless CLI installed and configured</li>
+    <li>Node.js (if using <code>npx</code> to run the MCP server)</li>
+    <li>Valid Akeyless account</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<ul>
+    <li>Verify the MCP server command is correct in Settings</li>
+    <li>Check that Akeyless CLI is installed and configured</li>
+    <li>Ensure the Akeyless profile (if specified) exists and is valid</li>
+    <li>Check IDE logs: <b>Help → Show Log in Files</b></li>
+</ul>
+
+<h3>Support</h3>
+<ul>
+    <li><b>Plugin issues</b>: Open an issue in the plugin repository</li>
+    <li><b>Akeyless MCP Server</b>: Contact <a href="https://www.akeyless.io/support">Akeyless support</a></li>
+    <li><b>Akeyless CLI</b>: See <a href="https://docs.akeyless.io/docs/cli">Akeyless CLI documentation</a></li>
+</ul>
+
+<p>For more information, visit <a href="https://www.akeyless.io">akeyless.io</a></p>
     ]]></description>
 
     <change-notes><![CDATA[
-    Initial release:
-    - Connect to Akeyless MCP server
-    - List and browse Akeyless items
-    - View item details
-    - Create and manage secrets
+<b>Version 1.0.1</b>
+<ul>
+    <li>Hierarchical folder tree view for Akeyless items</li>
+    <li>Pretty-printed JSON responses in Query MCP and MCP Tools tabs</li>
+    <li>Custom Akeyless plugin icon</li>
+    <li>Proper toolbar icons for Refresh, Create, and Configure actions</li>
+    <li>Fixed deprecated ContentFactory.SERVICE API usage</li>
+    <li>Fixed toolbar orientation (horizontal layout)</li>
+</ul>
+
+<b>Version 1.0.0</b>
+<ul>
+    <li>Initial release</li>
+    <li>Connect to Akeyless MCP server via stdio</li>
+    <li>Browse and search Akeyless items</li>
+    <li>View item details and metadata</li>
+    <li>Create and manage secrets</li>
+    <li>Query interface for natural language interaction</li>
+    <li>MCP Tools tab with all available tools</li>
+</ul>
     ]]></change-notes>
 
     <!-- Product and plugin compatibility requirements -->
