@@ -71,26 +71,27 @@ Create a plugin icon:
 You can also add:
 - `pluginIcon@2x.png` (80x80) for high-DPI displays
 
-## Step 3: Update build.gradle.kts
+## Step 3: Release checklist (each new Marketplace version)
 
-Your `build.gradle.kts` already has the publishing configuration. Make sure:
+1. **Version** — Set the same value in:
+   - `version` in `build.gradle.kts`
+   - `<version>` and `<change-notes>` in `src/main/resources/META-INF/plugin.xml`
+2. **Compatibility** — `patchPluginXml { sinceBuild.set("232") }` is the minimum IDE (2023.2). There is **no** `until-build` (all newer branches). Raise `sinceBuild` only if you drop support for older IDEs.
+3. **JDK for Gradle** — Compilation uses **JDK 17** via Gradle toolchains. If `./gradlew` fails on startup with a very new JDK (e.g. 25), set `org.gradle.java.home` in `gradle.properties` to JDK 17 or 21 (see comment in that file).
+4. **Secrets** — Copy `publish.env.example` to `publish.env` (gitignored), add `PUBLISH_TOKEN` and optional signing variables. Never commit tokens.
 
-1. **Version is correct**: Update `version` for each release
-2. **Compatibility range**: Update `sinceBuild` and `untilBuild` as needed
-3. **Plugin signing** (optional but recommended):
-   - Get a code signing certificate
-   - Set environment variables: `CERTIFICATE_CHAIN`, `PRIVATE_KEY`, `PRIVATE_KEY_PASSWORD`
+Your `build.gradle.kts` already wires `signPlugin` and `publishPlugin` from environment variables.
 
 ## Step 4: Build and Test
 
 ```bash
-# Clean and build
-./gradlew clean buildPlugin
+# Clean, test, and produce the upload ZIP
+./gradlew clean test buildPlugin
 
-# Test the plugin locally
+# Optional: run a sandbox PyCharm with the plugin
 ./gradlew runIde
 
-# Verify the plugin ZIP
+# Artifact to upload or publish
 ls -lh build/distributions/
 ```
 
@@ -119,20 +120,18 @@ ls -lh build/distributions/
 
 ### Option B: Automated Publishing (Recommended)
 
-1. **Get your publish token**:
-   - Go to https://plugins.jetbrains.com/author/me/token
-   - Generate a new token
-   - Copy the token
-
-2. **Set environment variable**:
+1. **Get your publish token**: https://plugins.jetbrains.com/author/me/token  
+2. **Configure env** (see `publish.env.example`):
    ```bash
-   export PUBLISH_TOKEN="your-token-here"
+   cp publish.env.example publish.env
+   # edit publish.env — set PUBLISH_TOKEN=perm:… and optional signing paths
+   set -a && source publish.env && set +a
    ```
-
-3. **Publish**:
+3. **Build, sign (if env set), and publish**:
    ```bash
-   ./gradlew publishPlugin
+   ./gradlew clean test buildPlugin signPlugin publishPlugin
    ```
+   If you are not using signing yet, omit `signPlugin` or leave signing variables unset (depending on your Marketplace requirements).
 
 ## Step 7: Plugin Review Process
 
@@ -148,40 +147,9 @@ After submission:
 - **Compatibility issues**: Test on multiple IDE versions
 - **Missing icons**: Add proper plugin icons
 
-## Step 8: Post-Publication
+## Step 8: Next release
 
-### Update Version
-
-For future releases:
-
-1. Update version in `build.gradle.kts`:
-   ```kotlin
-   version = "1.0.1"
-   ```
-
-2. Update `plugin.xml`:
-   ```xml
-   <version>1.0.1</version>
-   <change-notes><![CDATA[
-   Version 1.0.1:
-   - Fixed connection issues
-   - Improved error handling
-   - Added new features
-   ]]></change-notes>
-   ```
-
-3. Update compatibility if needed:
-   ```kotlin
-   patchPluginXml {
-       sinceBuild.set("232")
-       untilBuild.set("254.*") // Update for newer IDE versions
-   }
-   ```
-
-4. Build and publish:
-   ```bash
-   ./gradlew clean buildPlugin publishPlugin
-   ```
+Repeat the [release checklist](#step-3-release-checklist-each-new-marketplace-version), then `./gradlew clean test buildPlugin` and upload or `publishPlugin` again. The Marketplace rejects a version number that was already uploaded, so always increment the plugin version.
 
 ## Best Practices
 

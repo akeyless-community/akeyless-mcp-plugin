@@ -22,3 +22,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local publish secrets (see publish.env.example)
+publish.env
+.env

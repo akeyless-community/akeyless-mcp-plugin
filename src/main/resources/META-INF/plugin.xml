@@ -70,7 +70,9 @@ environment variables.</p>
     <change-notes><![CDATA[
 <b>Version 1.0.2</b>
 <ul>
-    <li>Open-ended IDE compatibility: removed upper <code>until-build</code> cap so the plugin remains installable on upcoming platform branches (for example 2026.1).</li>
+    <li>Open-ended IDE compatibility: no upper <code>until-build</code> cap, so the plugin stays installable on upcoming platform branches (for example 2026.1).</li>
+    <li>Default Akeyless profile credentials are injected only when the MCP server command is the <code>akeyless</code> CLI (avoids breaking other commands).</li>
+    <li>JDK 17 Gradle toolchains for reproducible builds.</li>
 </ul>
 
 <b>Version 1.0.1</b>

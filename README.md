@@ -27,9 +27,11 @@ This plugin connects JetBrains IDEs to Akeyless through the Model Context Protoc
    gradle buildPlugin
    ```
    
-   **Note**: The project includes a Gradle wrapper configured for Gradle 8.5, which is compatible with the IntelliJ plugin. If you encounter compatibility issues with Gradle 9.x, use the wrapper (`./gradlew`) instead.
+   **Note**: The project uses Gradle 8.5 and a **JDK 17** compile toolchain. If `./gradlew` fails to start because your default Java is too new (for example 25), set `org.gradle.java.home` in `gradle.properties` to a JDK 17 or 21 install (see the comment in that file).
 
-4. Install the plugin:
+4. **Publishing** to JetBrains Marketplace: see [PUBLISHING.md](PUBLISHING.md) and `publish.env.example`.
+
+5. Install the plugin:
    - Go to `File` > `Settings` > `Plugins`
    - Click the gear icon and select `Install Plugin from Disk...`
    - Select the generated plugin ZIP file from `build/distributions/`
