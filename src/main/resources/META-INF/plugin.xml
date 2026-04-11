@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.akeyless.mcp</id>
     <name>Akeyless MCP</name>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <vendor email="support@akeyless.io" url="https://www.akeyless.io">Akeyless</vendor>
 
     <description><![CDATA[
@@ -68,6 +68,11 @@ environment variables.</p>
     ]]></description>
 
     <change-notes><![CDATA[
+<b>Version 1.0.2</b>
+<ul>
+    <li>Open-ended IDE compatibility: removed upper <code>until-build</code> cap so the plugin remains installable on upcoming platform branches (for example 2026.1).</li>
+</ul>
+
 <b>Version 1.0.1</b>
 <ul>
     <li>Hierarchical folder tree view for Akeyless items</li>

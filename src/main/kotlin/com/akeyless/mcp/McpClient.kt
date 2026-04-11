@@ -94,9 +94,11 @@ class McpClient {
                 commandParts.addAll(serverArgs.split("\\s+".toRegex()))
             }
             
-            // Auto-detect auth flags from the default akeyless profile if not already specified
+            // Auto-detect auth flags from the default akeyless profile if not already specified.
+            // Only for the akeyless CLI binary so other commands (npx, test mocks, etc.) are unchanged.
             val argsStr = commandParts.joinToString(" ")
-            if (!argsStr.contains("--access-type") && !argsStr.contains("--access-id")) {
+            val isAkeylessCli = File(resolvedCommand).name.equals("akeyless", ignoreCase = true)
+            if (isAkeylessCli && !argsStr.contains("--access-type") && !argsStr.contains("--access-id")) {
                 val profileAuth = readAkeylessProfileAuth()
                 if (profileAuth != null) {
                     logger.info("Auto-injecting auth from default profile: access_type=${profileAuth.first}, access_id=${profileAuth.second}")

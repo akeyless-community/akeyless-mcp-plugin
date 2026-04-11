@@ -19,11 +19,11 @@ class McpClientTest {
         mockServerScript.writeText("""
             #!/bin/sh
             while read line; do
-                if echo "${'$'}line" | grep -q "initialize"; then
-                    echo '{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{},"serverInfo":{"name":"mock","version":"1.0"}}}'
-                elif echo "${'$'}line" | grep -q "notifications/initialized"; then
-                    # No response needed for notification
+                if echo "${'$'}line" | grep -q "notifications/initialized"; then
+                    # Must come before "initialize" — that substring also matches this notification
                     :
+                elif echo "${'$'}line" | grep -q '"method":"initialize"'; then
+                    echo '{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2024-11-05","capabilities":{},"serverInfo":{"name":"mock","version":"1.0"}}}'
                 elif echo "${'$'}line" | grep -q "tools/list"; then
                     echo '{"jsonrpc":"2.0","id":2,"result":{"tools":[{"name":"test_tool","description":"A test tool","inputSchema":{"type":"object","properties":{}}}]}}'
                 elif echo "${'$'}line" | grep -q "tools/call"; then

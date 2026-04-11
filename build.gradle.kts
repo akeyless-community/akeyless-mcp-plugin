@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.akeyless"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -13,8 +13,12 @@ repositories {
 
 intellij {
     version.set("2023.2")
-    type.set("IC") // IntelliJ IDEA Community Edition
+    // PyCharm Community for local runIde; platform APIs match IC (same 232 branch).
+    type.set("PC")
     plugins.set(listOf())
+    // Do not derive since/until from the sandbox IDE; we set sinceBuild only so the
+    // packaged plugin has no until-build (compatible with future IDE branches).
+    updateSinceUntilBuild.set(false)
 }
 
 tasks {
@@ -29,7 +33,6 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("232")
-        untilBuild.set("253.*")
     }
 
     signPlugin {
